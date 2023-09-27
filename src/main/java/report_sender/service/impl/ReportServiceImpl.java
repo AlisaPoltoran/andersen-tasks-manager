@@ -65,7 +65,7 @@ public class ReportServiceImpl implements ReportService {
         Document document = new Document();
         String fileToWrite = "WhiteTeam-" + LocalDateTime.now().format(todayFormatterDash) + ".pdf";
         PdfWriter.getInstance(document, new FileOutputStream(fileToWrite));
-        DateTimeFormatter hoursMinutesFormatter = DateTimeFormatter.ofPattern("HH:MM");
+        DateTimeFormatter hoursMinutesFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
         document.open();
         Font font = FontFactory.getFont(FontFactory.COURIER, 16, BaseColor.BLACK);
@@ -78,7 +78,7 @@ public class ReportServiceImpl implements ReportService {
             paragraph = new Paragraph();
             StringBuilder builder = new StringBuilder();
             builder.append("" + report.getUser().getName().toUpperCase() +
-                    " have done the following tasks"+ "\n\n");
+                    " has done the following tasks"+ "\n\n");
             int i = 1;
             for (Task task : report.getTaskList()) {
                 builder.append("Task #" + i++ + "\n");
