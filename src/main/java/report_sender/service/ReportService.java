@@ -15,7 +15,7 @@ public interface ReportService {
 
     String createPDFFinalReport(List<Report> reports) throws FileNotFoundException, DocumentException;
 
-    void sendFinalReportToEmail(String Email, String filePath) throws ServiceException;
+    void sendFinalReportToEmail(String email, String fil) throws ServiceException;
 
     void sendFinalReportToTelegram(String telegram);
 

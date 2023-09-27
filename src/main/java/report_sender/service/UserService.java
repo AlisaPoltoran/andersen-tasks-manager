@@ -5,4 +5,8 @@ import report_sender.service.exception.ServiceException;
 
 public interface UserService {
     User validateUser(User user) throws ServiceException;
+
+    void createTable() throws ServiceException;
+
+    void createUsers() throws ServiceException;
 }

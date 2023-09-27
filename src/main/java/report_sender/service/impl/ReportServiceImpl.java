@@ -15,7 +15,11 @@ import report_sender.repository.impl.ReportRepositoryImpl;
 import report_sender.service.ReportService;
 import report_sender.service.exception.ServiceException;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.Authenticator;
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -77,45 +81,58 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void sendFinalReportToEmail(String Email, String filePath) throws ServiceException {
+    public void sendFinalReportToEmail(String email, String file) throws ServiceException {
+
 
         Properties properties = new Properties();
-//        properties.put("mail.smtp.auth", true);
-//        properties.put("mail.smtp.starttls.enable", "true");
-        properties.put("mail.smtp.host", "localhost");
-//        properties.put("mail.smtp.port", "465");
-//        properties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+        properties.put("mail.smtp.host", "smtp.gmail.com");
+        properties.put("mail.smtp.socketFactory.port", "465");
+        properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        properties.put("mail.smtp.auth", "true");
+        properties.put("mail.smtp.port", "465");
+
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com"); //SMTP Host
+        props.put("mail.smtp.port", "587"); //TLS Port
+        props.put("mail.smtp.auth", "true"); //enable authentication
+        props.put("mail.smtp.starttls.enable", "true"); //enable STARTTLS
 
         String from = "shaturko.maksim@gmail.com";
         String to = "i.am.masy@gmail.com";
 
-        Session session = Session.getDefaultInstance(properties);
+
+        Session session = Session.getDefaultInstance(properties,
+                new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication("shaturko.maksim@gmail.com", "***********");
+                    }
+                });
+
         try {
-            Message message = new MimeMessage(session);
+            MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(from));
-            message.setRecipients(
-                    Message.RecipientType.TO, InternetAddress.parse(to));
-            message.setSubject("Mail Subject");
+            message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
 
-            String msg = "This is my first email using JavaMailer";
+            message.setSubject("This is the Subject Line!");
 
-            MimeBodyPart mimeBodyPart = new MimeBodyPart();
-            mimeBodyPart.setContent(msg, "text/html; charset=utf-8");
 
-//        MimeBodyPart attachmentBodyPart = new MimeBodyPart();
-//        attachmentBodyPart.attachFile(new File("test.pdf"));
-
+            BodyPart mimeBodyPart = new MimeBodyPart();
+            mimeBodyPart.setText("This is message body");
             Multipart multipart = new MimeMultipart();
+            DataSource source = new FileDataSource(file);
+            mimeBodyPart.setDataHandler(new DataHandler(source));
+            mimeBodyPart.setFileName(file);
             multipart.addBodyPart(mimeBodyPart);
 
             message.setContent(multipart);
 
             Transport.send(message);
-        } catch (MessagingException e) {
-            throw new ServiceException(e);
+
+            System.out.println("Sent message successfully....");
+        } catch (MessagingException mex) {
+            mex.printStackTrace();
         }
-
-
     }
 
     @Override

@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -37,10 +38,8 @@ public class ReportRepositoryImpl implements ReportRepository {
         for (Task task : tasks) {
             try (PreparedStatement ps = connection.prepareStatement(SAVE_TASK)) {
                 ps.setString(1, task.getToDo());
-                ps.setDate(2, new java.sql.Date(Date.from(task.getTimeBegin()
-                        .atZone(ZoneId.systemDefault()).toInstant()).getTime()));
-                ps.setDate(3, new java.sql.Date(Date.from(task.getTimeEnd()
-                        .atZone(ZoneId.systemDefault()).toInstant()).getTime()));
+                ps.setTimestamp(2, Timestamp.valueOf(task.getTimeBegin()));
+                ps.setTimestamp(3, Timestamp.valueOf(task.getTimeEnd()));
                 ps.setLong(4, task.getUserId());
                 ps.executeUpdate();
             } catch (SQLException e) {
@@ -66,10 +65,8 @@ public class ReportRepositoryImpl implements ReportRepository {
         }
         for (User user : users) {
             try (PreparedStatement ps = connection.prepareStatement(GET_TASKS_BY_PERIOD)) {
-                ps.setDate(1, new java.sql.Date
-                        (Date.from(from.atZone(ZoneId.systemDefault()).toInstant()).getTime()));
-                ps.setDate(2, new java.sql.Date
-                        (Date.from(from.atZone(ZoneId.systemDefault()).toInstant()).getTime()));
+                ps.setTimestamp(1, Timestamp.valueOf(from));
+                ps.setTimestamp(2, Timestamp.valueOf(to));
                 List<Task> tasks = new ArrayList<>();
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
@@ -96,7 +93,7 @@ public class ReportRepositoryImpl implements ReportRepository {
     }
 
 
-    private List<User> getAllUsers() throws RepositoryException {
+    public List<User> getAllUsers() throws RepositoryException {
         Connection connection = null;
         try {
             connection = transactionalRepository.startTransaction();
