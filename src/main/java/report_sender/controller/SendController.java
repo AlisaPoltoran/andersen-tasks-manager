@@ -29,15 +29,18 @@ public class SendController extends HttpServlet {
         LocalDateTime localDateTime = LocalDateTime.now();
 
         try {
-//            List<Report> reports = reportService
-//                    .createFinalReportFromTasks(localDateTime.toLocalDate().atTime(LocalTime.MIN),
-//                            localDateTime.toLocalDate().atTime(LocalTime.MAX));
-//            String file = reportService.createPDFFinalReport(reports);
-            reportService.sendFinalReportToEmail("", "newtest.pdf");
+            List<Report> reports = reportService
+                    .createFinalReportFromTasks(localDateTime.toLocalDate().atTime(LocalTime.MIN),
+                            localDateTime.toLocalDate().atTime(LocalTime.MAX));
+
+            String file = reportService.createPDFFinalReport(reports);
+            reportService.sendFinalReportToEmail("", file);
 
         } catch (ServiceException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
 
+        } catch (DocumentException e) {
+            e.printStackTrace();
         }
 
 

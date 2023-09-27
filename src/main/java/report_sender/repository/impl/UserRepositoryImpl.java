@@ -53,23 +53,27 @@ public class UserRepositoryImpl implements UserRepository {
 
         try {
             Statement statement = connection.createStatement();
-            statement.executeQuery("CREATE TABLE IF NOT EXISTS users (\n" +
-                    "  id serial PRIMARY KEY,\n" +
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS users (\n" +
+                    "  id INT GENERATED ALWAYS AS IDENTITY,\n" +
                     "  name VARCHAR(55) NOT NULL,\n" +
-                    "  password VARCHAR (55)\n" +
-                    ")\n" +
+                    "  password VARCHAR (55),\n" +
+                    "  PRIMARY KEY(id)" +
+                    ");\n" +
                     "\n" +
                     "CREATE TABLE IF NOT EXISTS tasks (\n" +
-                    "  id serial PRIMARY KEY,\n" +
-                    "  toDo VARCHAR(1000) NOT NULL,\n" +
+                    "  id INT GENERATED ALWAYS AS IDENTITY,\n" +
+                    "  job VARCHAR(1000) NOT NULL,\n" +
                     "  timeBegin TIMESTAMP NOT NULL,\n" +
                     "  timeEnd TIMESTAMP NOT NULL,\n" +
                     "  user_id INT NOT NULL,\n" +
-                    "  FOREGN KEY (user_id),\n" +
-                    "  REFERENCES countries (id)\n" +
+                    "  PRIMARY KEY(id),\n" +
+                    "  CONSTRAINT fk_user\n"+
+                    "  FOREIGN KEY(user_id)\n"+
+                    "  REFERENCES users(id)\n"+
                     "  ON DELETE NO ACTION\n" +
                     "  ON UPDATE NO ACTION\n" +
                     ");");
+
             transactionalRepository.commitTransaction(connection);
         } catch (SQLException e) {
             throw new RepositoryException(e);
@@ -89,17 +93,18 @@ public class UserRepositoryImpl implements UserRepository {
         }
         try {
             Statement statement = connection.createStatement();
-            statement.executeQuery("INSERT into users (id, name, password) \n" +
-                    "VALUES (1, 'daniil', 'daniil') \n" +
-                    "ON CONFLICT (id, name, password) DO NOTHING;\n" +
-                    "\n" +
-                    "INSERT into users (id, name, password) \n" +
-                    "VALUES (2, 'alisa', 'alisa')\n" +
-                    "ON CONFLICT (id, name, password) DO NOTHING;\n" +
-                    "\n" +
-                    "INSERT into users (id, name, password) \n" +
-                    "VALUES (3, 'maksim', 'maksim')\n" +
-                    "ON CONFLICT (id, name, password) DO NOTHING;");
+            Statement statement2 = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM users;");
+            if (!resultSet.next()) {
+                statement2.executeUpdate("INSERT into users (name, password) \n" +
+                        "VALUES ('daniil', 'daniil'); \n" +
+                        "\n" +
+                        "INSERT into users (name, password) \n" +
+                        "VALUES ('alisa', 'alisa');\n" +
+                        "\n" +
+                        "INSERT into users (name, password) \n" +
+                        "VALUES ('maksim', 'maksim');");
+            }
             transactionalRepository.commitTransaction(connection);
         } catch (SQLException e) {
             throw new RepositoryException(e);

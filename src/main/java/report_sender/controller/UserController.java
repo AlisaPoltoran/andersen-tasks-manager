@@ -32,7 +32,7 @@ public class UserController extends HttpServlet {
         try {
             user = userService.validateUser(user);
         } catch (ServiceException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
         ObjectMapper objectMapper = new ObjectMapper();

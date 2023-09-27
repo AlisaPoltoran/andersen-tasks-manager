@@ -8,9 +8,10 @@ public class Report {
     private List<Task> taskList;
     private User user;
 
-    public Report(long id, List<Task> taskList) {
+    public Report(long id, List<Task> taskList, User user) {
         this.id = id;
         this.taskList = taskList;
+        this.user = user;
     }
 
     public Report() {
@@ -46,7 +47,7 @@ public class Report {
         return "Report{" +
                 "id=" + id +
                 ", taskList=" + taskList +
-                ", user=" + user +
                 '}';
+//                ", user=" + user +
     }
 }

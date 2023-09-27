@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class Task {
     private long id;
-    private String toDo;
+    private String job;
     private LocalDateTime timeBegin;
     private LocalDateTime timeEnd;
     private long userId;
@@ -12,9 +12,9 @@ public class Task {
     public Task() {
     }
 
-    public Task(long id, String toDo, LocalDateTime timeBegin, LocalDateTime timeEnd, long userId) {
+    public Task(long id, String job, LocalDateTime timeBegin, LocalDateTime timeEnd, long userId) {
         this.id = id;
-        this.toDo = toDo;
+        this.job = job;
         this.timeBegin = timeBegin;
         this.timeEnd = timeEnd;
         this.userId = userId;
@@ -28,12 +28,12 @@ public class Task {
         this.id = id;
     }
 
-    public String getToDo() {
-        return toDo;
+    public String getJob() {
+        return job;
     }
 
-    public void setToDo(String toDo) {
-        this.toDo = toDo;
+    public void setJob(String job) {
+        this.job = job;
     }
 
     public LocalDateTime getTimeBegin() {
@@ -64,7 +64,7 @@ public class Task {
     public String toString() {
         return "Task{" +
                 "id=" + id +
-                ", toDo='" + toDo + '\'' +
+                ", job='" + job + '\'' +
                 ", timeBegin=" + timeBegin +
                 ", timeEnd=" + timeEnd +
                 ", userId=" + userId +

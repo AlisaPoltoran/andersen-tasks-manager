@@ -12,6 +12,7 @@ import report_sender.entity.User;
 import report_sender.service.JsonParserService;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -27,25 +28,29 @@ public class JsonParserServiceImpl implements JsonParserService {
     @Override
     public Report getReportFromJson(String jsonReport) {
         try {
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             JSONObject reportJsonObject = (JSONObject) new JSONParser().parse(jsonReport);
-            long id = (Long) reportJsonObject.get("id");
-
+            long userId = (Long) reportJsonObject.get("user_id");
             JSONArray tasksArr = (JSONArray) reportJsonObject.get("tasks");
+
             Report report = new Report();
-            report.setId(id);
 
             Iterator tasksItr = tasksArr.iterator();
             List<Task> tasks = new ArrayList<>();
             while (tasksItr.hasNext()) {
                 JSONObject test = (JSONObject) tasksItr.next();
                 Task task = new Task();
-                task.setId((long) test.get("id"));
-                task.setToDo((String) test.get("toDo"));
-                task.setTimeBegin(LocalDateTime.parse((String) test.get("timeBegin")));
-                task.setTimeEnd(LocalDateTime.parse((String) test.get("timeEnd")));
-                task.setUserId((long) test.get("userId"));
+                task.setJob((String) test.get("job"));
+                task.setTimeBegin(LocalDateTime.parse((String) test.get("timeBegin"), dateTimeFormatter));
+                task.setTimeEnd(LocalDateTime.parse((String) test.get("timeEnd"), dateTimeFormatter));
+                task.setUserId(userId);
                 tasks.add(task);
             }
+            System.out.println(tasks);
+
+
+
+
             report.setTaskList(tasks);
             return report;
         } catch (ParseException e) {

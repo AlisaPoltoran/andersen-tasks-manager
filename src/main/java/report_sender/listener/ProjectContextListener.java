@@ -6,7 +6,9 @@ import report_sender.service.impl.UserServiceImpl;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 
+@WebListener
 public class ProjectContextListener implements ServletContextListener {
     UserService userService = new UserServiceImpl();
     public void contextInitialized(ServletContextEvent sce) {

@@ -14,15 +14,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class ReportRepositoryImpl implements ReportRepository {
-    private final String SAVE_TASK = "INSERT INTO tasks (toDo, timeBegin, timeEnd, userId) VALUES (?,?,?,?)";
-    private final String GET_TASKS_BY_PERIOD = "SELECT * FROM tasks JOIN users ON users.id=tasks.user_id" +
-            "WHERE timeBegin > ? AND timeEnd < ? ORDER BY timeBegin";
+    private final String SAVE_TASK = "INSERT INTO tasks (job, timeBegin, timeEnd, user_id) VALUES (?,?,?,?)";
+    private final String GET_TASKS_BY_PERIOD = "SELECT * FROM tasks JOIN users ON (users.id=tasks.user_id)" +
+            "WHERE timebegin > ? AND timeend < ? AND user_id = ? ORDER BY timebegin";
     private final static String GET_ALL_USERS = "SELECT * from users";
     private TransactionalRepository transactionalRepository = new TransactionalRepositoryImpl();
 
@@ -37,7 +35,7 @@ public class ReportRepositoryImpl implements ReportRepository {
         }
         for (Task task : tasks) {
             try (PreparedStatement ps = connection.prepareStatement(SAVE_TASK)) {
-                ps.setString(1, task.getToDo());
+                ps.setString(1, task.getJob());
                 ps.setTimestamp(2, Timestamp.valueOf(task.getTimeBegin()));
                 ps.setTimestamp(3, Timestamp.valueOf(task.getTimeEnd()));
                 ps.setLong(4, task.getUserId());
@@ -67,19 +65,18 @@ public class ReportRepositoryImpl implements ReportRepository {
             try (PreparedStatement ps = connection.prepareStatement(GET_TASKS_BY_PERIOD)) {
                 ps.setTimestamp(1, Timestamp.valueOf(from));
                 ps.setTimestamp(2, Timestamp.valueOf(to));
+                ps.setInt(3, user.getId());
                 List<Task> tasks = new ArrayList<>();
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     int id = rs.getInt("id");
-                    String toDo = rs.getString("toDo");
-                    LocalDateTime timeBegin = new Date(rs.getDate("timeBegin").getTime())
-                            .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    LocalDateTime timeEnd = new Date(rs.getDate("timeEnd").getTime())
-                            .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    String toDo = rs.getString("job");
+                    LocalDateTime timeBegin = rs.getTimestamp("timeBegin").toLocalDateTime();
+                    LocalDateTime timeEnd = rs.getTimestamp("timeEnd").toLocalDateTime();
                     int user_id = rs.getInt("user_id");
                     tasks.add(new Task(id, toDo, timeBegin, timeEnd, user_id));
                 }
-                reports.add(new Report(user.getId(), tasks));
+                reports.add(new Report(user.getId(), tasks, user));
             } catch (SQLException e) {
                 throw new RepositoryException(e);
             }

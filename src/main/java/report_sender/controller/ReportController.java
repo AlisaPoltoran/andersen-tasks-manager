@@ -29,8 +29,7 @@ public class ReportController extends HttpServlet {
         try {
             reportService.saveReportAsTasks(report);
         } catch (ServiceException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
-
     }
 }

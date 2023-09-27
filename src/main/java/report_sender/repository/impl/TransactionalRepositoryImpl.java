@@ -16,14 +16,20 @@ public class TransactionalRepositoryImpl implements TransactionalRepository {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("PostgreSQL JDBC Driver is not found. Include it in your library path ");
         }
-        ds.setUrl("jdbc:postgresql://34.134.178.181/postgres-admin");
+        ds.setUrl("jdbc:postgresql://34.28.26.223:5432/postgres-admin");
         ds.setUsername("postgres-admin");
         ds.setPassword("postgresadmin");
         ds.setMinIdle(5);
         ds.setMaxIdle(10);
         ds.setMaxOpenPreparedStatements(100);
-    }
 
+//        ds.setUrl("jdbc:postgresql://192.168.1.74:5432/andersen_trainee");
+//        ds.setUsername("maksim");
+//        ds.setPassword("02042010");
+//        ds.setMinIdle(5);
+//        ds.setMaxIdle(10);
+//        ds.setMaxOpenPreparedStatements(100);
+    }
     public static Connection getConnection() throws SQLException {
         return ds.getConnection();
     }
