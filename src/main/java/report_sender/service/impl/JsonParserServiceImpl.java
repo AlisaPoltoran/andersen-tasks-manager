@@ -18,9 +18,16 @@ import java.util.Iterator;
 import java.util.List;
 
 public class JsonParserServiceImpl implements JsonParserService {
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private static final JsonParserServiceImpl INSTANCE = new JsonParserServiceImpl();
+    private JsonParserServiceImpl() {
+    }
+    public static JsonParserServiceImpl getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public User getUserFromJson(String jsonUser) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
         User user = objectMapper.readValue(jsonUser, User.class);
         return user;
     }
@@ -46,13 +53,10 @@ public class JsonParserServiceImpl implements JsonParserService {
                 task.setUserId(userId);
                 tasks.add(task);
             }
-            System.out.println(tasks);
-
-
-
-
             report.setTaskList(tasks);
+
             return report;
+
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }

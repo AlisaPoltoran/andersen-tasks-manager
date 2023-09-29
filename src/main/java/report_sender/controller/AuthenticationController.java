@@ -3,6 +3,7 @@ package report_sender.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import report_sender.entity.User;
 import report_sender.service.JsonParserService;
+import report_sender.service.ServiceProvider;
 import report_sender.service.UserService;
 import report_sender.service.exception.ServiceException;
 import report_sender.service.impl.JsonParserServiceImpl;
@@ -18,9 +19,10 @@ import java.io.PrintWriter;
 import java.util.stream.Collectors;
 
 @WebServlet("/user")
-public class UserController extends HttpServlet {
-    private UserService userService = new UserServiceImpl();
-    private JsonParserService jsonParserService = new JsonParserServiceImpl();
+public class AuthenticationController extends HttpServlet {
+    private ServiceProvider serviceProvider = ServiceProvider.getInstance();
+    private UserService userService = serviceProvider.getUserService();
+    private JsonParserService jsonParserService = serviceProvider.getJsonParserService();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

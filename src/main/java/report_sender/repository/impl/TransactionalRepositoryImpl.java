@@ -8,6 +8,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class TransactionalRepositoryImpl implements TransactionalRepository {
+    private static final TransactionalRepositoryImpl INSTANCE = new TransactionalRepositoryImpl();
+    private TransactionalRepositoryImpl() {
+    }
+    public static TransactionalRepository getInstance() {
+        return INSTANCE;
+    }
+
     private static BasicDataSource ds = new BasicDataSource();
 
     static {

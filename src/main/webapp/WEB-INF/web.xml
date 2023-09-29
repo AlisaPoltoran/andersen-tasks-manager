@@ -8,4 +8,17 @@
   <welcome-file-list>
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
+
+  <servlet>
+    <servlet-name>QuartzInitializer</servlet-name>
+    <display-name>Quartz Initializer Servlet</display-name>
+    <servlet-class>org.quartz.ee.servlet.QuartzInitializerServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>SchedulerListener</servlet-name>
+    <display-name>Scheduler Listener</display-name>
+    <servlet-class>report_sender.listener.scheduler.SchedulerListener</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
 </web-app>

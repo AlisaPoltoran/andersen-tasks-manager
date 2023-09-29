@@ -3,7 +3,8 @@ package report_sender.repository.impl;
 import report_sender.entity.Report;
 import report_sender.entity.Task;
 import report_sender.entity.User;
-import report_sender.repository.ReportRepository;
+import report_sender.repository.RepositoryProvider;
+import report_sender.repository.TaskRepository;
 import report_sender.repository.TransactionalRepository;
 import report_sender.repository.exception.RepositoryException;
 import report_sender.repository.exception.TransactionalException;
@@ -17,16 +18,23 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReportRepositoryImpl implements ReportRepository {
+public class TaskRepositoryImpl implements TaskRepository {
+    private static final TaskRepositoryImpl INSTANCE = new TaskRepositoryImpl();
+    private TaskRepositoryImpl() {
+    }
+    public static TaskRepositoryImpl getInstance() {
+        return INSTANCE;
+    }
+    private RepositoryProvider repositoryProvider= RepositoryProvider.getInstance();
+    private TransactionalRepository transactionalRepository = repositoryProvider.getTransactionalRepository();
     private final String SAVE_TASK = "INSERT INTO tasks (job, timeBegin, timeEnd, user_id) VALUES (?,?,?,?)";
     private final String GET_TASKS_BY_PERIOD = "SELECT * FROM tasks JOIN users ON (users.id=tasks.user_id)" +
             "WHERE timebegin > ? AND timeend < ? AND user_id = ? ORDER BY timebegin";
     private final static String GET_ALL_USERS = "SELECT * from users";
-    private TransactionalRepository transactionalRepository = new TransactionalRepositoryImpl();
-
 
     @Override
     public void saveTasks(List<Task> tasks) throws RepositoryException {
+
         Connection connection = null;
         try {
             connection = transactionalRepository.startTransaction();
@@ -52,7 +60,7 @@ public class ReportRepositoryImpl implements ReportRepository {
     }
 
     @Override
-    public List<Report> getTasksForPeriod(LocalDateTime from, LocalDateTime to) throws RepositoryException {
+    public List<Report> getTasksForPeriodAsReport(LocalDateTime from, LocalDateTime to) throws RepositoryException {
         List<User> users = getAllUsers();
         List<Report> reports = new ArrayList<>();
         Connection connection = null;
@@ -90,7 +98,7 @@ public class ReportRepositoryImpl implements ReportRepository {
     }
 
 
-    public List<User> getAllUsers() throws RepositoryException {
+    private List<User> getAllUsers() throws RepositoryException {
         Connection connection = null;
         try {
             connection = transactionalRepository.startTransaction();

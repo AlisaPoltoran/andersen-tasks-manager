@@ -5,9 +5,5 @@ import report_sender.repository.exception.RepositoryException;
 
 public interface UserRepository {
     User validateUser(User user) throws RepositoryException;
-
-    void createTables() throws RepositoryException;
-    void createUsers() throws  RepositoryException;
-
-
+    User registerUser(User user) throws RepositoryException;
 }

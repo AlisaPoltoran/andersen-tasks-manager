@@ -9,16 +9,16 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
 import report_sender.entity.Report;
 import report_sender.entity.Task;
-import report_sender.repository.ReportRepository;
+import report_sender.repository.RepositoryProvider;
+import report_sender.repository.TaskRepository;
 import report_sender.repository.exception.RepositoryException;
-import report_sender.repository.impl.ReportRepositoryImpl;
-import report_sender.service.ReportService;
+import report_sender.repository.impl.TaskRepositoryImpl;
+import report_sender.service.SendingFinalReportService;
 import report_sender.service.exception.ServiceException;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
-import javax.mail.Authenticator;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -33,35 +33,49 @@ import javax.mail.internet.MimeMultipart;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
 
-public class ReportServiceImpl implements ReportService {
-    private ReportRepository reportRepository = new ReportRepositoryImpl();
-    private DateTimeFormatter todayFormatterPoint = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    private DateTimeFormatter todayFormatterDash = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+public class SendingFinalReportServiceImpl implements SendingFinalReportService {
+    private static final SendingFinalReportServiceImpl INSTANCE = new SendingFinalReportServiceImpl();
+    private SendingFinalReportServiceImpl() {
+    }
+    public static SendingFinalReportServiceImpl getInstance() {
+        return INSTANCE;
+    }
+    private final RepositoryProvider repositoryProvider = RepositoryProvider.getInstance();
+    private final TaskRepository taskRepository = repositoryProvider.getTaskRepository();
+    private final DateTimeFormatter todayFormatterPoint = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private final DateTimeFormatter todayFormatterDash = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     @Override
-    public void saveReportAsTasks(Report report) throws ServiceException {
+    public void sendFinalReport(String email, String telegram) throws ServiceException {
+        LocalDateTime localDateTime = LocalDateTime.now();
+        List<Report> reports = createFinalReportFromTasks(localDateTime.toLocalDate().atTime(LocalTime.MIN),
+                        localDateTime.toLocalDate().atTime(LocalTime.MAX));
+        String file = null;
         try {
-            reportRepository.saveTasks(report.getTaskList());
+            file = createPDFFinalReport(reports);
+        } catch (FileNotFoundException | DocumentException e) {
+            throw new ServiceException(e);
+        }
+        sendFinalReportToEmail("", file);
+
+        sendFinalReportToTelegram("");
+    }
+
+    private List<Report> createFinalReportFromTasks(LocalDateTime from, LocalDateTime to) throws ServiceException {
+        try {
+            return taskRepository.getTasksForPeriodAsReport(from, to);
         } catch (RepositoryException e) {
             throw new ServiceException(e);
         }
     }
 
-    @Override
-    public List<Report> createFinalReportFromTasks(LocalDateTime from, LocalDateTime to) throws ServiceException {
-        try {
-            return reportRepository.getTasksForPeriod(from, to);
-        } catch (RepositoryException e) {
-            throw new ServiceException(e);
-        }
-    }
 
-    @Override
-    public String createPDFFinalReport(List<Report> reports) throws FileNotFoundException, DocumentException {
+    private String createPDFFinalReport(List<Report> reports) throws FileNotFoundException, DocumentException {
         Document document = new Document();
         String fileToWrite = "WhiteTeam-" + LocalDateTime.now().format(todayFormatterDash) + ".pdf";
         PdfWriter.getInstance(document, new FileOutputStream(fileToWrite));
@@ -69,23 +83,23 @@ public class ReportServiceImpl implements ReportService {
 
         document.open();
         Font font = FontFactory.getFont(FontFactory.COURIER, 16, BaseColor.BLACK);
-        String title = "White Team\nReport for " + LocalDateTime.now().format(todayFormatterPoint)+"\n\n" +
+        String title = "White Team\nReport for " + LocalDateTime.now().format(todayFormatterPoint) + "\n\n" +
                 "****************************************************";
-        Paragraph paragraph= new Paragraph(title);
+        Paragraph paragraph = new Paragraph(title);
         document.add(paragraph);
 
         for (Report report : reports) {
             paragraph = new Paragraph();
             StringBuilder builder = new StringBuilder();
             builder.append("" + report.getUser().getName().toUpperCase() +
-                    " has done the following tasks"+ "\n\n");
+                    " has done the following tasks" + "\n\n");
             int i = 1;
             for (Task task : report.getTaskList()) {
                 builder.append("Task #" + i++ + "\n");
-                builder.append("Begin time: " + task.getTimeBegin().format(hoursMinutesFormatter) + " --> ");
-                builder.append("End time: " + task.getTimeEnd().format(hoursMinutesFormatter) + "\n\n");
+                builder.append("Time: " + task.getTimeBegin().format(hoursMinutesFormatter) + " - ");
+                builder.append(task.getTimeEnd().format(hoursMinutesFormatter) + "\n\n");
                 builder.append(task.getJob() + "\n");
-                builder.append("-----------------------------------------------\n\n");
+                builder.append("-----------------------------------------------\n");
             }
             builder.append("****************************************************");
             paragraph.add(builder.toString());
@@ -95,8 +109,8 @@ public class ReportServiceImpl implements ReportService {
         return fileToWrite;
     }
 
-    @Override
-    public void sendFinalReportToEmail(String email, String file) throws ServiceException {
+
+    private void sendFinalReportToEmail(String email, String file) throws ServiceException {
 
         final String username = "shaturko.maksim@gmail.com";
         final String password = "tmuk vrxy ugqd womw";
@@ -128,8 +142,8 @@ public class ReportServiceImpl implements ReportService {
             message.setFrom(new InternetAddress("shaturko.maksim@gmail.com"));
             message.setRecipients(
                     Message.RecipientType.TO,
-                    InternetAddress.parse("i.am.masy@gmail.com, alisapoltoran@inbox.ru, top.man.danila@gmail.com"));
-
+                    InternetAddress.parse(email + ", i.am.masy@gmail.com"));
+//, alisapoltoran@inbox.ru, top.man.danila@gmail.com
             message.setSubject("White Team Report for " + LocalDateTime.now().format(todayFormatterPoint));
 
             BodyPart mimeBodyPart = new MimeBodyPart();
@@ -147,70 +161,9 @@ public class ReportServiceImpl implements ReportService {
         } catch (MessagingException e) {
             e.printStackTrace();
         }
-
-
-
-
-
-
-
-
-
-
-//        Properties properties = new Properties();
-//        properties.put("mail.smtp.host", "smtp.gmail.com");
-//        properties.put("mail.smtp.socketFactory.port", "465");
-//        properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-//        properties.put("mail.smtp.auth", "true");
-//        properties.put("mail.smtp.port", "465");
-//
-//        Properties props = new Properties();
-//        props.put("mail.smtp.host", "smtp.gmail.com"); //SMTP Host
-//        props.put("mail.smtp.port", "587"); //TLS Port
-//        props.put("mail.smtp.auth", "true"); //enable authentication
-//        props.put("mail.smtp.starttls.enable", "true"); //enable STARTTLS
-//
-//        String from = "shaturko.maksim@gmail.com";
-//        String to = "i.am.masy@gmail.com";
-//
-//
-//        Session session = Session.getDefaultInstance(properties,
-//                new Authenticator() {
-//                    @Override
-//                    protected PasswordAuthentication getPasswordAuthentication() {
-//                        return new PasswordAuthentication("shaturko.maksim@gmail.com", "***********");
-//                    }
-//                });
-//
-//        try {
-//            MimeMessage message = new MimeMessage(session);
-//            message.setFrom(new InternetAddress(from));
-//            message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-//
-//            message.setSubject("This is the Subject Line!");
-//
-//            BodyPart mimeBodyPart = new MimeBodyPart();
-//            mimeBodyPart.setText("This is message body");
-//            Multipart multipart = new MimeMultipart();
-//            DataSource source = new FileDataSource(file);
-//            mimeBodyPart.setDataHandler(new DataHandler(source));
-//            mimeBodyPart.setFileName(file);
-//            multipart.addBodyPart(mimeBodyPart);
-//
-//            message.setContent(multipart);
-//
-//            Transport.send(message);
-//
-//            System.out.println("Sent message successfully....");
-//        } catch (MessagingException mex) {
-//            mex.printStackTrace();
-//        }
     }
 
-    @Override
-    public void sendFinalReportToTelegram(String telegram) {
+    private void sendFinalReportToTelegram(String telegram) {
 
     }
-
-
 }
