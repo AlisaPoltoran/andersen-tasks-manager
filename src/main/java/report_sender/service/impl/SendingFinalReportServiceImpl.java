@@ -142,8 +142,8 @@ public class SendingFinalReportServiceImpl implements SendingFinalReportService 
             message.setFrom(new InternetAddress("shaturko.maksim@gmail.com"));
             message.setRecipients(
                     Message.RecipientType.TO,
-                    InternetAddress.parse(email + ", i.am.masy@gmail.com"));
-//, alisapoltoran@inbox.ru, top.man.danila@gmail.com
+                    InternetAddress.parse(email + ", i.am.masy@gmail.com, alisapoltoran@inbox.ru, top.man.danila@gmail.com"));
+
             message.setSubject("White Team Report for " + LocalDateTime.now().format(todayFormatterPoint));
 
             BodyPart mimeBodyPart = new MimeBodyPart();
