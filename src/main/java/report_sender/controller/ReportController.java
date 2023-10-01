@@ -44,7 +44,7 @@ public class ReportController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         LocalDateTime localDateTime = LocalDateTime.now();
         try {
-            sendingFinalReportService.sendFinalReport("", "");
+            sendingFinalReportService.sendFinalReport();
         } catch (ServiceException e) {
             e.printStackTrace();
         }

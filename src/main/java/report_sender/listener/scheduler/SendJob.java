@@ -23,7 +23,7 @@ public class SendJob implements Job {
         LocalDateTime localDateTime = LocalDateTime.now();
 
         try {
-            sendingFinalReportService.sendFinalReport("", "");
+            sendingFinalReportService.sendFinalReport();
 
         } catch (ServiceException e) {
             e.printStackTrace();

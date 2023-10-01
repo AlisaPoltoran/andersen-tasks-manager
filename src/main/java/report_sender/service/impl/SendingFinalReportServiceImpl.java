@@ -7,13 +7,14 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
+import report_sender.ConfigService;
 import report_sender.entity.Report;
 import report_sender.entity.Task;
 import report_sender.repository.RepositoryProvider;
 import report_sender.repository.TaskRepository;
 import report_sender.repository.exception.RepositoryException;
-import report_sender.repository.impl.TaskRepositoryImpl;
 import report_sender.service.SendingFinalReportService;
+import report_sender.service.ServiceProvider;
 import report_sender.service.exception.ServiceException;
 
 import javax.activation.DataHandler;
@@ -45,13 +46,15 @@ public class SendingFinalReportServiceImpl implements SendingFinalReportService 
     public static SendingFinalReportServiceImpl getInstance() {
         return INSTANCE;
     }
+    private ConfigService configService = ServiceProvider.getInstance().getConfigReaderService();
+
     private final RepositoryProvider repositoryProvider = RepositoryProvider.getInstance();
     private final TaskRepository taskRepository = repositoryProvider.getTaskRepository();
     private final DateTimeFormatter todayFormatterPoint = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private final DateTimeFormatter todayFormatterDash = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     @Override
-    public void sendFinalReport(String email, String telegram) throws ServiceException {
+    public void sendFinalReport() throws ServiceException {
         LocalDateTime localDateTime = LocalDateTime.now();
         List<Report> reports = createFinalReportFromTasks(localDateTime.toLocalDate().atTime(LocalTime.MIN),
                         localDateTime.toLocalDate().atTime(LocalTime.MAX));
@@ -61,9 +64,8 @@ public class SendingFinalReportServiceImpl implements SendingFinalReportService 
         } catch (FileNotFoundException | DocumentException e) {
             throw new ServiceException(e);
         }
-        sendFinalReportToEmail("", file);
-
-        sendFinalReportToTelegram("");
+        sendFinalReportToEmail(configService.getProperty("recipients.emails"), file);
+        sendFinalReportToTelegram(configService.getProperty("recipients.telegrams"));
     }
 
     private List<Report> createFinalReportFromTasks(LocalDateTime from, LocalDateTime to) throws ServiceException {
@@ -110,10 +112,10 @@ public class SendingFinalReportServiceImpl implements SendingFinalReportService 
     }
 
 
-    private void sendFinalReportToEmail(String email, String file) throws ServiceException {
+    private void sendFinalReportToEmail(String recipientsEmails, String file) throws ServiceException {
 
-        final String username = "shaturko.maksim@gmail.com";
-        final String password = "tmuk vrxy ugqd womw";
+        final String senderUsername = configService.getProperty("sender.email");
+        final String senderPassword = configService.getProperty("sender.password");
 
 //        Properties prop = new Properties();
 //        prop.put("mail.smtp.host", "smtp.gmail.com");
@@ -123,26 +125,26 @@ public class SendingFinalReportServiceImpl implements SendingFinalReportService 
 //        prop.put("mail.smtp.ssl.trust", "smtp.gmail.com");
 
         Properties properties = new Properties();
-        properties.put("mail.smtp.host", "smtp.gmail.com");
-        properties.put("mail.smtp.socketFactory.port", "465");
-        properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        properties.put("mail.smtp.auth", "true");
-        properties.put("mail.smtp.port", "465");
-        properties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+        properties.put("mail.smtp.host", configService.getProperty("mail.smtp.host"));
+        properties.put("mail.smtp.socketFactory.port", configService.getProperty("mail.smtp.socketFactory.port"));
+        properties.put("mail.smtp.socketFactory.class", configService.getProperty("mail.smtp.socketFactory.class"));
+        properties.put("mail.smtp.auth", configService.getProperty("mail.smtp.auth"));
+        properties.put("mail.smtp.port", configService.getProperty("mail.smtp.port"));
+        properties.put("mail.smtp.ssl.trust", configService.getProperty("mail.smtp.ssl.trust"));
 
         Session session = Session.getInstance(properties,
                 new javax.mail.Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(username, password);
+                        return new PasswordAuthentication(senderUsername, senderPassword);
                     }
                 });
         try {
 
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("shaturko.maksim@gmail.com"));
+            message.setFrom(new InternetAddress(senderUsername));
             message.setRecipients(
                     Message.RecipientType.TO,
-                    InternetAddress.parse(email + ", i.am.masy@gmail.com, alisapoltoran@inbox.ru, top.man.danila@gmail.com"));
+                    InternetAddress.parse(recipientsEmails));
 
             message.setSubject("White Team Report for " + LocalDateTime.now().format(todayFormatterPoint));
 

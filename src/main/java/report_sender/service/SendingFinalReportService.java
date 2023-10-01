@@ -10,5 +10,5 @@ import java.util.List;
 
 public interface SendingFinalReportService {
 
-    void sendFinalReport(String email, String telegram) throws ServiceException;
+    void sendFinalReport() throws ServiceException;
 }
