@@ -7,14 +7,12 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
-import report_sender.ConfigService;
 import report_sender.entity.Report;
 import report_sender.entity.Task;
 import report_sender.repository.RepositoryProvider;
 import report_sender.repository.TaskRepository;
 import report_sender.repository.exception.RepositoryException;
 import report_sender.service.SendingFinalReportService;
-import report_sender.service.ServiceProvider;
 import report_sender.service.exception.ServiceException;
 
 import javax.activation.DataHandler;
@@ -39,6 +37,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
 
+import static report_sender.ConfigService.getProperty;
+
 public class SendingFinalReportServiceImpl implements SendingFinalReportService {
     private static final SendingFinalReportServiceImpl INSTANCE = new SendingFinalReportServiceImpl();
     private SendingFinalReportServiceImpl() {
@@ -46,8 +46,6 @@ public class SendingFinalReportServiceImpl implements SendingFinalReportService 
     public static SendingFinalReportServiceImpl getInstance() {
         return INSTANCE;
     }
-    private ConfigService configService = ServiceProvider.getInstance().getConfigReaderService();
-
     private final RepositoryProvider repositoryProvider = RepositoryProvider.getInstance();
     private final TaskRepository taskRepository = repositoryProvider.getTaskRepository();
     private final DateTimeFormatter todayFormatterPoint = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -64,8 +62,8 @@ public class SendingFinalReportServiceImpl implements SendingFinalReportService 
         } catch (FileNotFoundException | DocumentException e) {
             throw new ServiceException(e);
         }
-        sendFinalReportToEmail(configService.getProperty("recipients.emails"), file);
-        sendFinalReportToTelegram(configService.getProperty("recipients.telegrams"));
+        sendFinalReportToEmail(getProperty("recipients.emails"), file);
+        sendFinalReportToTelegram(getProperty("recipients.telegrams"));
     }
 
     private List<Report> createFinalReportFromTasks(LocalDateTime from, LocalDateTime to) throws ServiceException {
@@ -114,8 +112,8 @@ public class SendingFinalReportServiceImpl implements SendingFinalReportService 
 
     private void sendFinalReportToEmail(String recipientsEmails, String file) throws ServiceException {
 
-        final String senderUsername = configService.getProperty("sender.email");
-        final String senderPassword = configService.getProperty("sender.password");
+        final String senderUsername = getProperty("sender.email");
+        final String senderPassword = getProperty("sender.password");
 
 //        Properties prop = new Properties();
 //        prop.put("mail.smtp.host", "smtp.gmail.com");
@@ -125,12 +123,12 @@ public class SendingFinalReportServiceImpl implements SendingFinalReportService 
 //        prop.put("mail.smtp.ssl.trust", "smtp.gmail.com");
 
         Properties properties = new Properties();
-        properties.put("mail.smtp.host", configService.getProperty("mail.smtp.host"));
-        properties.put("mail.smtp.socketFactory.port", configService.getProperty("mail.smtp.socketFactory.port"));
-        properties.put("mail.smtp.socketFactory.class", configService.getProperty("mail.smtp.socketFactory.class"));
-        properties.put("mail.smtp.auth", configService.getProperty("mail.smtp.auth"));
-        properties.put("mail.smtp.port", configService.getProperty("mail.smtp.port"));
-        properties.put("mail.smtp.ssl.trust", configService.getProperty("mail.smtp.ssl.trust"));
+        properties.put("mail.smtp.host", getProperty("mail.smtp.host"));
+        properties.put("mail.smtp.socketFactory.port", getProperty("mail.smtp.socketFactory.port"));
+        properties.put("mail.smtp.socketFactory.class", getProperty("mail.smtp.socketFactory.class"));
+        properties.put("mail.smtp.auth", getProperty("mail.smtp.auth"));
+        properties.put("mail.smtp.port", getProperty("mail.smtp.port"));
+        properties.put("mail.smtp.ssl.trust", getProperty("mail.smtp.ssl.trust"));
 
         Session session = Session.getInstance(properties,
                 new javax.mail.Authenticator() {
