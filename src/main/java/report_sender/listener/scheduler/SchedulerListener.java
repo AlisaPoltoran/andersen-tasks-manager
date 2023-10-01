@@ -39,7 +39,7 @@ public class SchedulerListener extends GenericServlet {
                     .withIdentity("reportDailySender")
                     .startNow()
                     .withSchedule(CronScheduleBuilder
-                            .cronSchedule("0 0 23 ? * MON-FRI")
+                            .cronSchedule("0 0 23 ? * MON-SUN")
                             .inTimeZone(TimeZone.getTimeZone("Europe/Minsk")))
                     .build();
 

@@ -7,12 +7,20 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
+
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import report_sender.entity.Report;
 import report_sender.entity.Task;
+
+import report_sender.entity.telegram.TelegramBot;
 import report_sender.repository.RepositoryProvider;
 import report_sender.repository.TaskRepository;
 import report_sender.repository.exception.RepositoryException;
-import report_sender.repository.impl.TaskRepositoryImpl;
+
 import report_sender.service.SendingFinalReportService;
 import report_sender.service.exception.ServiceException;
 
@@ -35,26 +43,33 @@ import java.io.FileOutputStream;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 public class SendingFinalReportServiceImpl implements SendingFinalReportService {
     private static final SendingFinalReportServiceImpl INSTANCE = new SendingFinalReportServiceImpl();
+
     private SendingFinalReportServiceImpl() {
     }
+
     public static SendingFinalReportServiceImpl getInstance() {
         return INSTANCE;
     }
+
     private final RepositoryProvider repositoryProvider = RepositoryProvider.getInstance();
     private final TaskRepository taskRepository = repositoryProvider.getTaskRepository();
     private final DateTimeFormatter todayFormatterPoint = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private final DateTimeFormatter todayFormatterDash = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
+    private final static Set<Long> telegramChatIds = new HashSet<>();
+
     @Override
     public void sendFinalReport(String email, String telegram) throws ServiceException {
         LocalDateTime localDateTime = LocalDateTime.now();
         List<Report> reports = createFinalReportFromTasks(localDateTime.toLocalDate().atTime(LocalTime.MIN),
-                        localDateTime.toLocalDate().atTime(LocalTime.MAX));
+                localDateTime.toLocalDate().atTime(LocalTime.MAX));
         String file = null;
         try {
             file = createPDFFinalReport(reports);
@@ -63,7 +78,7 @@ public class SendingFinalReportServiceImpl implements SendingFinalReportService 
         }
         sendFinalReportToEmail("", file);
 
-        sendFinalReportToTelegram("");
+        sendFinalReportToTelegram("", file);
     }
 
     private List<Report> createFinalReportFromTasks(LocalDateTime from, LocalDateTime to) throws ServiceException {
@@ -163,7 +178,19 @@ public class SendingFinalReportServiceImpl implements SendingFinalReportService 
         }
     }
 
-    private void sendFinalReportToTelegram(String telegram) {
+    private void sendFinalReportToTelegram(String telegram, String file) {
 
+        try {
+            TelegramBot bot = new TelegramBot("6627273887:AAEfzm7jwv3ehVThEwZ6O8mHXnatA4qKQeY");
+            bot.setChatIds(telegramChatIds);
+            bot.setFileName(file);
+            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
+            botsApi.registerBot(bot);
+            Thread.sleep(1000);
+            bot.sendReport();
+
+        } catch (TelegramApiException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
