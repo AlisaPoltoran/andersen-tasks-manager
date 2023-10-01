@@ -44,14 +44,14 @@ public class AuthenticationController extends HttpServlet {
         writer.write(jsonUser);
     }
 
-    @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        setAccessControlHeaders(resp);
-        resp.setStatus(HttpServletResponse.SC_OK);
-    }
-
-    private void setAccessControlHeaders(HttpServletResponse resp) {
-        resp.setHeader("Access-Control-Allow-Origin", "*");
-        resp.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    }
+//    @Override
+//    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//        setAccessControlHeaders(resp);
+//        resp.setStatus(HttpServletResponse.SC_OK);
+//    }
+//
+//    private void setAccessControlHeaders(HttpServletResponse resp) {
+//        resp.setHeader("Access-Control-Allow-Origin", "*");
+//        resp.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+//    }
 }
