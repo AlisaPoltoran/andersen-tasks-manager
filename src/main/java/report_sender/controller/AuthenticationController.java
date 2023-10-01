@@ -24,6 +24,7 @@ public class AuthenticationController extends HttpServlet {
     private UserService userService = serviceProvider.getUserService();
     private JsonParserService jsonParserService = serviceProvider.getJsonParserService();
 
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -41,5 +42,16 @@ public class AuthenticationController extends HttpServlet {
         String jsonUser = objectMapper.writeValueAsString(user);
         PrintWriter writer = response.getWriter();
         writer.write(jsonUser);
+    }
+
+    @Override
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        setAccessControlHeaders(resp);
+        resp.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    private void setAccessControlHeaders(HttpServletResponse resp) {
+        resp.setHeader("Access-Control-Allow-Origin", "*");
+        resp.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     }
 }
