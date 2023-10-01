@@ -13,8 +13,8 @@ public class CorsFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
-//        response.setHeader("Access-Control-Allow-Origin", "http://34.172.240.254:3000");
-        response.setHeader("Access-Control-Allow-Origin", ConfigService.getProperty("frontend.url"));
+        response.setHeader("Access-Control-Allow-Origin", "*");
+//        response.setHeader("Access-Control-Allow-Origin", ConfigService.getProperty("frontend.url"));
 //        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, API-Key");
