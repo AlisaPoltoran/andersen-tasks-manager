@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  db:
+    container_name: pg_db
+    image: postgres:15
+    environment:
+      POSTGRES_USER: adminpg
+      POSTGRES_PASSWORD: adminpg
+      POSTGRES_DB: reportdb
+    volumes:
+      - ./data/postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+#    report_sender_war_exploded
