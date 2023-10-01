@@ -23,7 +23,7 @@ public class TransactionalRepositoryImpl implements TransactionalRepository {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("PostgreSQL JDBC Driver is not found. Include it in your library path ");
         }
-        ds.setUrl("jdbc:postgresql://localhost:5432/reportdb");
+        ds.setUrl("jdbc:postgresql://34.28.26.223:5432/reportdb");
         ds.setUsername("adminpg");
         ds.setPassword("adminpg");
         ds.setMinIdle(5);
