@@ -3,11 +3,13 @@ package report_sender.repository.impl;
 import org.apache.commons.dbcp2.BasicDataSource;
 import report_sender.repository.TransactionalRepository;
 import report_sender.repository.exception.TransactionalException;
+import static report_sender.ConfigService.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public class TransactionalRepositoryImpl implements TransactionalRepository {
+
     private static final TransactionalRepositoryImpl INSTANCE = new TransactionalRepositoryImpl();
     private TransactionalRepositoryImpl() {
     }
@@ -15,20 +17,20 @@ public class TransactionalRepositoryImpl implements TransactionalRepository {
         return INSTANCE;
     }
 
-    private static BasicDataSource ds = new BasicDataSource();
+    private static final BasicDataSource ds = new BasicDataSource();
 
-    static {
+    static   {
         try {
-            Class.forName("org.postgresql.Driver");
+            Class.forName(getProperty("database.driver"));
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("PostgreSQL JDBC Driver is not found. Include it in your library path ");
         }
-        ds.setUrl("jdbc:postgresql://localhost:5432/reportdb");
-        ds.setUsername("adminpg");
-        ds.setPassword("adminpg");
-        ds.setMinIdle(5);
-        ds.setMaxIdle(10);
-        ds.setMaxOpenPreparedStatements(100);
+        ds.setUrl(getProperty("database.url"));
+        ds.setUsername(getProperty("database.username"));
+        ds.setPassword(getProperty("database.password"));
+        ds.setMinIdle(Integer.parseInt(getProperty("database.minIdl")));
+        ds.setMaxIdle(Integer.parseInt(getProperty("database.maxIdle")));
+        ds.setMaxOpenPreparedStatements(Integer.parseInt(getProperty("database.maxOpenPreparedStatements")));
 
 //        ds.setUrl("jdbc:postgresql://192.168.1.74:5432/andersen_trainee");
 //        ds.setUsername("maksim");
@@ -79,6 +81,6 @@ public class TransactionalRepositoryImpl implements TransactionalRepository {
             connection.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        };
+        }
     }
 }
