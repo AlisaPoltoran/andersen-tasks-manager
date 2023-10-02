@@ -20,8 +20,6 @@ public class SendJob implements Job {
     private SendingFinalReportService sendingFinalReportService = serviceProvider.getSendingFinalReportService();
 
     public void execute(JobExecutionContext arg0) throws JobExecutionException {
-        LocalDateTime localDateTime = LocalDateTime.now();
-
         try {
             sendingFinalReportService.sendFinalReport();
 
