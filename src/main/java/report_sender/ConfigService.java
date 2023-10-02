@@ -13,7 +13,7 @@ public class ConfigService {
 
     static {
         try {
-            loadPropertiesFromFile(System.getProperty("profile"));
+            loadPropertiesFromFile(System.getProperty("profile") != null ? System.getProperty("profile") : "prod");
         } catch (ServiceException e) {
             throw new RuntimeException("Can not read properties file");
         }
