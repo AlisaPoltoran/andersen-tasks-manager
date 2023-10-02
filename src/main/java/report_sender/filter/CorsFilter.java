@@ -10,8 +10,9 @@ import java.io.IOException;
 
 @WebFilter("/*")
 public class CorsFilter implements Filter {
+//just to test something
 
-    @Override
+   @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         HttpServletRequest request = (HttpServletRequest) servletRequest;
