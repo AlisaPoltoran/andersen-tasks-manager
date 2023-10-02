@@ -13,15 +13,15 @@ public class ConfigService {
 
     static {
         try {
-            loadPropertiesFromFile();
+            loadPropertiesFromFile(System.getProperty("profile") != null ? System.getProperty("profile") : "prod");
         } catch (ServiceException e) {
             throw new RuntimeException("Can not read properties file");
         }
     }
 
-    public static void loadPropertiesFromFile() throws ServiceException {
+    public static void loadPropertiesFromFile(String profile) throws ServiceException {
         properties = new Properties();
-        try (InputStream input = ConfigService.class.getClassLoader().getResourceAsStream("application.properties")) {
+        try (InputStream input = ConfigService.class.getClassLoader().getResourceAsStream("application-" + profile +".properties")) {
             properties.load(input);
         } catch (IOException e) {
             throw new ServiceException("Can not read properties file");
